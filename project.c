@@ -8,7 +8,9 @@
 #define MAX_ROWS 30
 #define MAX_COLS 30
 int df = 10;
-float px=0.0,py=175.0;
+int textX = 700;
+int textY = 100;
+float px = 0.0, py = 175.0;
 typedef struct
 {
     bool left;
@@ -27,7 +29,11 @@ typedef struct
     int startCol;
     int endRow;
     int endCol;
+    int playerRow;
+    int playerCol;
 } MazeGrid;
+
+MazeGrid maze;
 
 void output(int x, int y, char *string)
 {
@@ -38,37 +44,10 @@ void output(int x, int y, char *string)
     }
 }
 
-void keyboard(unsigned char key, int x, int y)
-{
-
-    if (df == 10 && key == 13)
-        df = 1;
-    else if ((df == 0 || df == 4 || df == 5) && key == '1')
-    {
-        df = 1;
-        glutPostRedisplay();
-    }
-    else if (df == 0 && key == '2')
-        df = 2;
-    else if (df == 0 && key == '3')
-        df = 3;
-    else if (key == 27)
-    {
-        df = 0;
-    }
-    if ((key == '0' || key == '1') && (df == 4 || df == 1))
-    {
-        px = 0.0;
-        py = 175.0;
-    }
-    glutPostRedisplay();
-}
-
 int window_width = 1000;
 int window_height = 1000;
 int cell_size = 30;
 
-MazeGrid maze;
 void reshape(int w, int h)
 {
     glViewport(0, 0, w, h);
@@ -92,6 +71,8 @@ void initialize_maze()
             maze.cells[row][col].visited = false;
         }
     }
+    maze.playerRow = maze.startRow;
+    maze.playerCol = maze.startCol;
 }
 void generate_maze(int row, int col)
 {
@@ -212,6 +193,8 @@ void draw_maze()
             }
         }
     }
+    glColor3f(1, 1, 1);
+    // output(textX + 200, textY, "Controls :");
 
     // Draw the starting point
     int startX = maze.startCol * cell_size + offsetX;
@@ -224,7 +207,84 @@ void draw_maze()
     int endY = maze.endRow * cell_size + offsetY;
     glColor3f(1.0, 0.0, 0.0); // Red color
     glRecti(endX, endY, endX + cell_size, endY + cell_size);
+
+    // Draw the player block
+    int playerX = maze.playerCol * cell_size + offsetX;
+    int playerY = maze.playerRow * cell_size + offsetY;
+    glColor3f(0.0, 0.0, 1.0); // Blue color
+    glRecti(playerX, playerY, playerX + cell_size, playerY + cell_size);
+
     glutSwapBuffers();
+}
+void controlkeys(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_UP: // Up arrow key
+        if (!maze.cells[maze.playerRow][maze.playerCol].top)
+            maze.playerRow--;
+        break;
+    case GLUT_KEY_DOWN: // Down arrow key
+        if (!maze.cells[maze.playerRow][maze.playerCol].bottom)
+            maze.playerRow++;
+        break;
+    case GLUT_KEY_LEFT: // Left arrow key
+        if (!maze.cells[maze.playerRow][maze.playerCol].left)
+            maze.playerCol--;
+        break;
+    case GLUT_KEY_RIGHT: // Right arrow key
+        if (!maze.cells[maze.playerRow][maze.playerCol].right)
+            maze.playerCol++;
+        break;
+    case 27:
+        df = 0;
+        break;
+    }
+    glutPostRedisplay();
+}
+void keyboard(unsigned char key, int x, int y)
+{
+
+    if (df == 10 && key == 13)
+        df = 0;
+    else if ((df == 0 || df == 4 || df == 5) && key == '1')
+    {
+        df = 1;
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
+    }
+    else if (df == 0 && key == '2')
+        df = 2;
+    else if (df == 0 && key == '3')
+        exit(0);
+    else if (key == 27)
+    {
+        df = 0;
+    }
+    if ((key == '0' || key == '1') && (df == 4 || df == 1))
+    {
+        px = 0.0;
+        py = 175.0;
+    }
+
+    glutPostRedisplay();
+}
+void startscreen()
+{
+    glViewport(0, 0, window_width, window_height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, window_width, window_height, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glColor3f(1.0, 0.0, 0.0);
+    output(textX, textY, "WELCOME TO MAZE GENERATION AND SOLVING");
+    glColor3f(0.0, 1.0, 1.0);
+    output(textX, textY + 200, "1.NEW GAME");
+    glColor3f(0.0, 1.0, 1.0);
+    output(textX, textY + 300, "2.INSTRUCTIONS");
+    glColor3f(0.0, 1.0, 1.0);
+    output(textX, textY + 400, "3.QUIT");
 }
 void frontscreen()
 {
@@ -234,9 +294,6 @@ void frontscreen()
     gluOrtho2D(0, window_width, window_height, 0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glColor3f(1.0, 1.0, 1.0);
-    int textX = 700;
-    int textY = 100;
 
     char collegeName[] = "JSS ACADEMY OF TECHNICAL EDUCATION";
     char department[] = "DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING";
@@ -252,34 +309,35 @@ void frontscreen()
     output(textX, textY, collegeName);
     glColor3f(0.0, 1.0, 0.0);
     output(textX - 100, textY + 100, department);
-    
+
     glColor3f(0.0, 0.0, 1.0);
     output(textX + 100, textY + 200, projectName);
-    
+
     glColor3f(1.0, 1.0, 0.0);
     output(textX + 40, textY + 250, proName);
-    
+
     glColor3f(1.0, 0.0, 1.0);
     output(textX + 100, textY + 400, underGuide);
-    
+
     glColor3f(0.0, 1.0, 1.0);
     output(textX + 100, textY + 450, lecturerName);
-   
+
     glColor3f(1.0, 0.0, 1.0);
     output(textX + 200, textY + 600, doneBy);
-    
+
     glColor3f(0.0, 1.0, 0.0);
     output(textX - 100, textY + 650, byName);
-    
+
     glColor3f(1.0, 1.0, 1.0);
     output(textX + 300, textY + 850, next);
-    
 }
 void display_maze()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     if (df == 10)
         frontscreen();
+    if (df == 0)
+        startscreen();
     if (df == 1)
     {
         glViewport(0, 0, window_width, window_height);
@@ -325,6 +383,7 @@ int main(int argc, char **argv)
     glGetError();
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(controlkeys);
 
     glutMainLoop();
     return 0;
