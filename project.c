@@ -7,6 +7,8 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
+int df = 10;
+float px=0.0,py=175.0;
 typedef struct
 {
     bool left;
@@ -27,6 +29,41 @@ typedef struct
     int endCol;
 } MazeGrid;
 
+void output(int x, int y, char *string)
+{
+    glRasterPos2i(x, y);
+    for (int i = 0; i < strlen(string); i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+    }
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+
+    if (df == 10 && key == 13)
+        df = 1;
+    else if ((df == 0 || df == 4 || df == 5) && key == '1')
+    {
+        df = 1;
+        glutPostRedisplay();
+    }
+    else if (df == 0 && key == '2')
+        df = 2;
+    else if (df == 0 && key == '3')
+        df = 3;
+    else if (key == 27)
+    {
+        df = 0;
+    }
+    if ((key == '0' || key == '1') && (df == 4 || df == 1))
+    {
+        px = 0.0;
+        py = 175.0;
+    }
+    glutPostRedisplay();
+}
+
 int window_width = 1000;
 int window_height = 1000;
 int cell_size = 30;
@@ -41,6 +78,7 @@ void reshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
+
 void initialize_maze()
 {
     for (int row = 0; row < maze.rows; row++)
@@ -188,17 +226,71 @@ void draw_maze()
     glRecti(endX, endY, endX + cell_size, endY + cell_size);
     glutSwapBuffers();
 }
+void frontscreen()
+{
+    glViewport(0, 0, window_width, window_height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, window_width, window_height, 0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glColor3f(1.0, 1.0, 1.0);
+    int textX = 700;
+    int textY = 100;
+
+    char collegeName[] = "JSS ACADEMY OF TECHNICAL EDUCATION";
+    char department[] = "DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING";
+    char projectName[] = "A MINI PROJECT ON :";
+    char proName[] = "MAZE GENERATION USING DFS";
+    char doneBy[] = "By :";
+    char byName[] = "Aneesh Khatawkar (1JS17CS350) and Sudarshana MG (1JS20CS167)";
+    char underGuide[] = "Under The Guidence of :";
+    char lecturerName[] = "Sharana Basava Gowda";
+    char next[] = "Press ENTER to go to next screen";
+
+    glColor3f(1.0, 0.0, 0.0);
+    output(textX, textY, collegeName);
+    glColor3f(0.0, 1.0, 0.0);
+    output(textX - 100, textY + 100, department);
+    
+    glColor3f(0.0, 0.0, 1.0);
+    output(textX + 100, textY + 200, projectName);
+    
+    glColor3f(1.0, 1.0, 0.0);
+    output(textX + 40, textY + 250, proName);
+    
+    glColor3f(1.0, 0.0, 1.0);
+    output(textX + 100, textY + 400, underGuide);
+    
+    glColor3f(0.0, 1.0, 1.0);
+    output(textX + 100, textY + 450, lecturerName);
+   
+    glColor3f(1.0, 0.0, 1.0);
+    output(textX + 200, textY + 600, doneBy);
+    
+    glColor3f(0.0, 1.0, 0.0);
+    output(textX - 100, textY + 650, byName);
+    
+    glColor3f(1.0, 1.0, 1.0);
+    output(textX + 300, textY + 850, next);
+    
+}
 void display_maze()
 {
     glClear(GL_COLOR_BUFFER_BIT);
+    if (df == 10)
+        frontscreen();
+    if (df == 1)
+    {
         glViewport(0, 0, window_width, window_height);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         gluOrtho2D(0, window_width, window_height, 0);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glColor3f(0.7, 0.5, 0.5);
+        glColor3f(0.8, 0.5, 0.6);
         draw_maze();
+    }
     glutSwapBuffers();
 }
 int main(int argc, char **argv)
@@ -232,6 +324,7 @@ int main(int argc, char **argv)
     glutDisplayFunc(display_maze);
     glGetError();
     glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
 
     glutMainLoop();
     return 0;
