@@ -214,8 +214,6 @@ void draw_maze()
     if (maze.playerRow == maze.endRow && maze.playerCol == maze.endCol)
     {
         df = 5;
-        maze.playerRow = maze.startRow;
-        maze.playerCol = maze.startCol;
     }
     glutSwapBuffers();
 }
@@ -253,6 +251,10 @@ void keyboard(unsigned char key, int x, int y)
     else if ((df == 0 || df == 4 || df == 5) && key == '1')
     {
         df = 1;
+        initialize_maze();
+        generate_maze(maze.startRow, maze.startCol);
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol;
         start = clock();
         controlkeys((int)key, x, y);
         glutPostRedisplay();
