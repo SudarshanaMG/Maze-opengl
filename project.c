@@ -7,11 +7,10 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 4, count;
+int df = 10, count;
 int textX = 700;
 int textY = 100;
 char t[2];
-float px = 0.0, py = 175.0;
 clock_t start, end;
 void winscreen();
 typedef struct
@@ -80,7 +79,6 @@ void initialize_maze()
 void generate_maze(int row, int col)
 {
     maze.cells[row][col].visited = true;
-
     while (true)
     {
         // Create an array to store the unvisited neighbors
@@ -143,8 +141,7 @@ void generate_maze(int row, int col)
         }
         else
         {
-            // No unvisited neighbors, backtrack to the previous cell
-            return;
+            return; // No unvisited neighbors, backtrack to the previous cell
         }
     }
 }
@@ -196,57 +193,51 @@ void draw_maze()
             }
         }
     }
-    glColor3f(1, 1, 1);
-    // output(textX + 200, textY, "Controls :");
+    // player block
+    int playerX = maze.playerCol * cell_size + offsetX;
+    int playerY = maze.playerRow * cell_size + offsetY;
+    glColor3f(0.0, 0.0, 1.0); // Blue color
+    glRecti(playerX, playerY, playerX + cell_size, playerY + cell_size);
 
-    // Draw the starting point
+    // starting point
     int startX = maze.startCol * cell_size + offsetX;
     int startY = maze.startRow * cell_size + offsetY;
     glColor3f(0.0, 1.0, 0.0); // Green color
     glRecti(startX, startY, startX + cell_size, startY + cell_size);
 
-    // Draw the ending point
+    // ending point
     int endX = maze.endCol * cell_size + offsetX;
     int endY = maze.endRow * cell_size + offsetY;
     glColor3f(1.0, 0.0, 0.0); // Red color
     glRecti(endX, endY, endX + cell_size, endY + cell_size);
 
-    // Draw the player block
-    int playerX = maze.playerCol * cell_size + offsetX;
-    int playerY = maze.playerRow * cell_size + offsetY;
-    glColor3f(0.0, 0.0, 1.0); // Blue color
-    glRecti(playerX, playerY, playerX + cell_size, playerY + cell_size);
     if (maze.playerRow == maze.endRow && maze.playerCol == maze.endCol)
     {
         df = 5;
-        winscreen();
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol;
     }
-
     glutSwapBuffers();
 }
 void controlkeys(int key, int x, int y)
 {
-    int offsetX = (window_width - (maze.cols * cell_size)) / 2;
-    int offsetY = (window_height - (maze.rows * cell_size)) / 2;
-    int endX = maze.endCol * cell_size + offsetX;
-    int endY = maze.endRow * cell_size + offsetY;
     switch (key)
     {
     case GLUT_KEY_UP: // Up arrow key
-            if (!maze.cells[maze.playerRow][maze.playerCol].top)
-                maze.playerRow--;
+        if (!maze.cells[maze.playerRow][maze.playerCol].top)
+            maze.playerRow--;
         break;
     case GLUT_KEY_DOWN: // Down arrow key
-            if (!maze.cells[maze.playerRow][maze.playerCol].bottom)
-                maze.playerRow++;
+        if (!maze.cells[maze.playerRow][maze.playerCol].bottom)
+            maze.playerRow++;
         break;
     case GLUT_KEY_LEFT: // Left arrow key
-            if (!maze.cells[maze.playerRow][maze.playerCol].left)
-                maze.playerCol--;
+        if (!maze.cells[maze.playerRow][maze.playerCol].left)
+            maze.playerCol--;
         break;
     case GLUT_KEY_RIGHT: // Right arrow key
-            if (!maze.cells[maze.playerRow][maze.playerCol].right)
-                maze.playerCol++;
+        if (!maze.cells[maze.playerRow][maze.playerCol].right)
+            maze.playerCol++;
         break;
     case 27:
         df = 0;
@@ -262,8 +253,8 @@ void keyboard(unsigned char key, int x, int y)
     else if ((df == 0 || df == 4 || df == 5) && key == '1')
     {
         df = 1;
+        start = clock();
         controlkeys((int)key, x, y);
-        start=clock();
         glutPostRedisplay();
     }
     else if (df == 0 && key == '2')
@@ -288,12 +279,16 @@ void winscreen()
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glColor3f(0.0, 1.0, 0.0);
-    output(textX+100, textY, "CONGRATS!!!");
+    output(textX + 100, textY, "CONGRATS!!!");
     glColor3f(0.0, 1.0, 1.0);
-    output(textX-100, textY + 100, "YOU HAVE SUCCEEDED IN FINDING OUT THE PATH");
+    output(textX - 100, textY + 100, "YOU HAVE SUCCEEDED IN FINDING OUT THE PATH");
+    output(textX + 30, textY + 200, "YOU TOOK ");
+    sprintf(t, "%d", count);
+    output(textX + 180, textY + 200, t);
+    output(textX + 230, textY + 200, "SECONDS");
     glColor3f(1.0, 0.0, 1.0);
-    output(textX-20, textY + 200, "* PRESS ESC TO GO TO MAIN MENU");
-    output(textX-20, textY + 300, "* PRESS 1 TO RESTART THE GAME");
+    output(textX - 20, textY + 300, "* PRESS ESC TO GO TO MAIN MENU");
+    output(textX - 20, textY + 400, "* PRESS 1 TO RESTART THE GAME");
     glFlush();
 }
 void instructions()
@@ -318,12 +313,13 @@ void timeover()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 0, 0);
-    output(textX, textY, "TIMEOVER");
-    glColor3f(0, 1, 0);
-    output(textX, textY + 100, "YOU HAVE LOST THE GAME");
-    output(textX, textY + 200, "BETTER LUCK NEXT TIME");
-    output(textX, textY + 300, "* PRESS ESC TO GO TO MAIN MENU");
-    output(textX, textY + 400, "* PRESS 1 TO RESTART THE GAME");
+    output(textX + 200, textY, "TIMEOVER");
+    glColor3f(0, 1, 1);
+    output(textX + 100, textY + 100, "YOU HAVE LOST THE GAME");
+    output(textX + 100, textY + 200, "BETTER LUCK NEXT TIME");
+    glColor3f(1, 1, 0);
+    output(textX + 50, textY + 300, "* PRESS ESC TO GO TO MAIN MENU");
+    output(textX + 50, textY + 400, "* PRESS 1 TO RESTART THE GAME");
     glFlush();
 }
 void startscreen()
@@ -334,14 +330,14 @@ void startscreen()
     gluOrtho2D(0, window_width, window_height, 0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glColor3f(1.0, 0.0, 0.0);
-    output(textX, textY, "WELCOME TO MAZE GENERATION AND SOLVING");
+    glColor3f(1.0, 1.0, 0.0);
+    output(textX, textY + 150, "WELCOME TO MAZE GENERATION AND SOLVING");
     glColor3f(0.0, 1.0, 1.0);
-    output(textX+100, textY + 200, "1.NEW GAME");
+    output(textX + 150, textY + 300, "1.NEW GAME");
     glColor3f(0.0, 1.0, 1.0);
-    output(textX+100, textY + 300, "2.INSTRUCTIONS");
+    output(textX + 150, textY + 400, "2.INSTRUCTIONS");
     glColor3f(0.0, 1.0, 1.0);
-    output(textX+100, textY + 400, "3.QUIT");
+    output(textX + 150, textY + 500, "3.QUIT");
 }
 void frontscreen()
 {
@@ -401,9 +397,9 @@ void idle()
         else if ((count < 60) && (maze.playerRow == maze.endRow && maze.playerCol == maze.endCol))
         {
             df = 5;
+            winscreen();
         }
     }
-
     glutPostRedisplay();
 }
 void display_maze()
@@ -422,12 +418,12 @@ void display_maze()
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glColor3f(0.0, 0.0, 1.0);
-        output(textX, textY, "TIME REMAINING : ");
-        output(textX, textY + 100, "HURRY UP");
+        output(textX + 50, textY, "TIME REMAINING : ");
+        output(textX + 50, textY + 50, "HURRY UP!!!!");
         glColor3f(1, 0, 0);
-        output(textX + 200, textY + 100, "Time is running out");
+        output(textX + 250, textY + 50, "Time is running out");
         sprintf(t, "%d", 60 - count);
-        output(textX+300, textY, t);
+        output(textX + 300, textY, t);
         glColor3f(0.8, 0.5, 0.6);
         draw_maze();
     }
@@ -450,18 +446,15 @@ void display_maze()
 int main(int argc, char **argv)
 {
     srand(time(NULL)); // Initialize random seed
-    /* printf("Enter the number of rows (1-%d): ", MAX_ROWS);
+    printf("Enter the number of rows (1-%d): ", MAX_ROWS);
     scanf("%d", &maze.rows);
     printf("Enter the number of columns (1-%d): ", MAX_COLS);
-    scanf("%d", &maze.cols); */
-    maze.rows = 10;
-    maze.cols = 10;
+    scanf("%d", &maze.cols);
     if (maze.rows <= 0 || maze.rows > MAX_ROWS || maze.cols <= 0 || maze.cols > MAX_COLS)
     {
         printf("Invalid maze dimensions.\n");
         return 1;
     }
-
     maze.startRow = 0;
     maze.startCol = 0;
     maze.endRow = maze.rows - 1;
