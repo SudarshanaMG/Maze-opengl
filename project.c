@@ -445,10 +445,10 @@ void display_maze()
 }
 int main(int argc, char **argv)
 {
-    srand(time(NULL)); // Initialize random seed
-    printf("Enter the number of rows (1-%d): ", MAX_ROWS);
+    // Initialize random seed
+    printf("Enter the number of rows for maze(1-%d): ", MAX_ROWS);
     scanf("%d", &maze.rows);
-    printf("Enter the number of columns (1-%d): ", MAX_COLS);
+    printf("Enter the number of columns for maze(1-%d): ", MAX_COLS);
     scanf("%d", &maze.cols);
     if (maze.rows <= 0 || maze.rows > MAX_ROWS || maze.cols <= 0 || maze.cols > MAX_COLS)
     {
