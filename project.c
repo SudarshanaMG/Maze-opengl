@@ -7,10 +7,11 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 10;
+int df = 10,count;
 int textX = 700;
 int textY = 100;
 float px = 0.0, py = 175.0;
+clock_t start,end;
 typedef struct
 {
     bool left;
@@ -263,11 +264,54 @@ void keyboard(unsigned char key, int x, int y)
     }
     if ((key == '0' || key == '1') && (df == 4 || df == 1))
     {
-        px = 0.0;
-        py = 175.0;
+        df = 1;
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
     }
 
     glutPostRedisplay();
+}
+void winscreen()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+    glColor3f(0.0, 1.0, 0.0);
+    output(textX, textY, "CONGRATS!!!");
+    glColor3f(1.0, 0.0, 1.0);
+    output(textX, textY + 100, "YOU HAVE SUCCEEDED IN FINDING OUT THE PATH");
+    output(textX, textY + 200, "* PRESS ESC TO GO TO MAIN MENU");
+    output(textX, textY + 300, "* PRESS 1 TO RESTART THE GAME");
+    glFlush();
+}
+void instructions()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 1.0, 0.0);
+    output(textX+100,textY+50, "INSTRUCTIONS:");
+    glBegin(GL_LINES);
+    glVertex2f(textX+80.0,textY+70.0);
+    glVertex2f(textX+550.0,textY+70.0);
+    glEnd();
+    glColor3f(0, 1, 0);
+    output(textX-200,textY+200, "* TO MOVE THE POINT USE ARROW KEYS");
+    output(textX-200,textY+300, "* FIND THE WAY TO MOVE INTO THE MAZE AND GET OUT");
+    output(textX-200,textY+400, "* GREEN COLOURED BLOCK INDICATE THE POINT FROM WHERE YOU HAVE TO START");
+    output(textX-200,textY+500, "* RED COLOURED BLOCK INDICATE THE POINT WHERE YOU HAVE TO REACH");
+    output(textX-200,textY+600, "* YOU WILL HAVE TO HURRY AS YOU HAVE ONLY 60 SECONDS TIME");
+    output(textX-200,textY+700, "* PRESS ESC TO GO TO MAIN MENU");
+    glFlush();
+}
+void timeover()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 0, 0);
+    output(textX,textY, "TIMEOVER");
+    glColor3f(0, 1, 0);
+    output(textX,textY+100, "YOU HAVE LOST THE GAME");
+    output(textX,textY+200, "BETTER LUCK NEXT TIME");
+    output(textX,textY+300, "* PRESS ESC TO GO TO MAIN MENU");
+    output(textX,textY+400, "* PRESS 1 TO RESTART THE GAME");
+    glFlush();
 }
 void startscreen()
 {
@@ -331,14 +375,32 @@ void frontscreen()
     glColor3f(1.0, 1.0, 1.0);
     output(textX + 300, textY + 850, next);
 }
+void idle()
+{
+    if (df == 1)
+    {
+        end = clock();
+        count = (end - start) / CLOCKS_PER_SEC;
+        if (count == 60)
+        {
+            df = 4;
+        }
+        else if ((count < 60) && (maze.playerRow==maze.endRow && maze.playerCol==maze.endCol))
+        {
+            df = 5;
+        }
+    }
+
+    glutPostRedisplay();
+}
 void display_maze()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     if (df == 10)
         frontscreen();
-    if (df == 0)
+    else if (df == 0)
         startscreen();
-    if (df == 1)
+    else if (df == 1)
     {
         glViewport(0, 0, window_width, window_height);
         glMatrixMode(GL_PROJECTION);
@@ -349,6 +411,20 @@ void display_maze()
         glColor3f(0.8, 0.5, 0.6);
         draw_maze();
     }
+    else if (df == 2)
+        instructions();
+    else if (df == 3)
+    {
+        exit(1);
+    }
+    else if (df == 4)
+    {
+        timeover();
+    }
+    else if (df == 5)
+    {
+        winscreen();
+    }
     glutSwapBuffers();
 }
 int main(int argc, char **argv)
@@ -358,8 +434,8 @@ int main(int argc, char **argv)
     scanf("%d", &maze.rows);
     printf("Enter the number of columns (1-%d): ", MAX_COLS);
     scanf("%d", &maze.cols); */
-    maze.rows = 20;
-    maze.cols = 20;
+    maze.rows = 10;
+    maze.cols = 10;
     if (maze.rows <= 0 || maze.rows > MAX_ROWS || maze.cols <= 0 || maze.cols > MAX_COLS)
     {
         printf("Invalid maze dimensions.\n");
