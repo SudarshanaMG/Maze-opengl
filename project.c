@@ -252,9 +252,9 @@ void keyboard(unsigned char key, int x, int y)
     {
         df = 1;
         initialize_maze();
-        generate_maze(maze.startRow, maze.startCol);
+        generate_maze(maze.startRow, maze.startCol); //for generation of new mazes
         maze.playerRow = maze.startRow;
-        maze.playerCol = maze.startCol;
+        maze.playerCol = maze.startCol; //for restarting of maze
         start = clock();
         controlkeys((int)key, x, y);
         glutPostRedisplay();
