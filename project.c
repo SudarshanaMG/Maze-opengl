@@ -37,6 +37,19 @@ typedef struct
 
 MazeGrid maze;
 
+typedef struct
+{
+    int row;
+    int col;
+} Point;
+
+typedef struct
+{
+    int distance;
+    Point previous;
+} PathCell;
+
+PathCell path[MAX_ROWS][MAX_COLS];
 void output(int x, int y, char *string)
 {
     glRasterPos2i(x, y);
@@ -143,6 +156,27 @@ void generate_maze(int row, int col)
         {
             return; // No unvisited neighbors, backtrack to the previous cell
         }
+    }
+}
+void mark_shortest_path()
+{
+    int row = maze.endRow;
+    int col = maze.endCol;
+
+    // Mark the shortest path by setting the corresponding walls to false
+    while (row != -1 && col != -1)
+    {
+        Point previous = path[row][col].previous;
+        if (previous.row == row - 1) // Top neighbor
+            maze.cells[row][col].bottom = false;
+        else if (previous.row == row + 1) // Bottom neighbor
+            maze.cells[row][col].top = false;
+        else if (previous.col == col - 1) // Left neighbor
+            maze.cells[row][col].right = false;
+        else if (previous.col == col + 1) // Right neighbor
+            maze.cells[row][col].left = false;
+        row = previous.row;
+        col = previous.col;
     }
 }
 
@@ -550,6 +584,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(window_width, window_height);
     glutCreateWindow("Maze Generator");
+    mark_shortest_path();
 
     glutDisplayFunc(display_maze);
     glGetError();
