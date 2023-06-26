@@ -364,7 +364,7 @@ void frontscreen()
     char doneBy[] = "By :";
     char byName[] = "Aneesh Khatawkar (1JS17CS350) and Sudarshana MG (1JS20CS167)";
     char underGuide[] = "Under The Guidence of :";
-    char lecturerName[] = "Dr. Sharana Basava Gowda";
+    char lecturerName[] = " Dr. Sharana B.G - Associate Professor - Department of CSE";
     char next[] = "Press ENTER to go to next screen";
 
     glColor3f(1.0, 0.0, 0.0);
@@ -382,7 +382,7 @@ void frontscreen()
     output(textX + 100, textY + 400, underGuide);
 
     glColor3f(0.0, 1.0, 1.0);
-    output(textX + 100, textY + 450, lecturerName);
+    output(textX -70, textY + 450, lecturerName);
 
     glColor3f(1.0, 0.0, 1.0);
     output(textX + 200, textY + 600, doneBy);
