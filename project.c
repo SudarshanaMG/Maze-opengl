@@ -37,19 +37,6 @@ typedef struct
 
 MazeGrid maze;
 
-typedef struct
-{
-    int row;
-    int col;
-} Point;
-
-typedef struct
-{
-    int distance;
-    Point previous;
-} PathCell;
-
-PathCell path[MAX_ROWS][MAX_COLS];
 void output(int x, int y, char *string)
 {
     glRasterPos2i(x, y);
@@ -158,27 +145,6 @@ void generate_maze(int row, int col)
         }
     }
 }
-void mark_shortest_path()
-{
-    int row = maze.endRow;
-    int col = maze.endCol;
-
-    // Mark the shortest path by setting the corresponding walls to false
-    while (row != -1 && col != -1)
-    {
-        Point previous = path[row][col].previous;
-        if (previous.row == row - 1) // Top neighbor
-            maze.cells[row][col].bottom = false;
-        else if (previous.row == row + 1) // Bottom neighbor
-            maze.cells[row][col].top = false;
-        else if (previous.col == col - 1) // Left neighbor
-            maze.cells[row][col].right = false;
-        else if (previous.col == col + 1) // Right neighbor
-            maze.cells[row][col].left = false;
-        row = previous.row;
-        col = previous.col;
-    }
-}
 
 void draw_maze()
 {
@@ -227,29 +193,6 @@ void draw_maze()
             }
         }
     }
-    for (int row = 0; row < maze.rows; row++)
-    {
-        for (int col = 0; col < maze.cols; col++)
-        {
-            // Check if the cell is part of the path
-            if (maze.cells[row][col].visited)
-            {
-                glColor3f(1.0, 1.0, 0.0); // Yellow color
-                int x = col * cell_size + offsetX;
-                int y = row * cell_size + offsetY;
-                float left = x;
-                float right = x + cell_size;
-                float top = y;
-                float bottom = y + cell_size;
-                glBegin(GL_QUADS);
-                glVertex2f(left, bottom);
-                glVertex2f(right, bottom);
-                glVertex2f(right, top);
-                glVertex2f(left, top);
-                glEnd();
-            }
-        }
-    }
     // player block
     int playerX = maze.playerCol * cell_size + offsetX;
     int playerY = maze.playerRow * cell_size + offsetY;
@@ -273,56 +216,6 @@ void draw_maze()
         df = 5;
     }
     glutSwapBuffers();
-}
-void find_path()
-{
-    // Create a queue to store the cells to be visited
-    Cell *queue[MAX_ROWS * MAX_COLS];
-    int front = 0, rear = 0;
-
-    // Mark the starting cell as visited
-    maze.cells[maze.startRow][maze.startCol].visited = true;
-    queue[rear++] = &maze.cells[maze.startRow][maze.startCol];
-
-    // Loop until the queue is empty
-    while (front != rear)
-    {
-        // Dequeue a cell from the queue
-        Cell *current = queue[front++];
-        int offset = current - &maze.cells[0][0];
-        int row = offset / MAX_COLS;
-        int col = offset % MAX_COLS;
-
-        // Check if the current cell is the ending cell
-        if (row == maze.endRow && col == maze.endCol)
-            return; // Path found, exit the function
-
-        // Enqueue unvisited neighboring cells
-        if (row > 0 && !maze.cells[row - 1][col].visited && !maze.cells[row][col].top)
-        {
-            maze.cells[row - 1][col].visited = true;
-            maze.cells[row - 1][col].bottom = false;
-            queue[rear++] = &maze.cells[row - 1][col];
-        }
-        if (row < maze.rows - 1 && !maze.cells[row + 1][col].visited && !maze.cells[row][col].bottom)
-        {
-            maze.cells[row + 1][col].visited = true;
-            maze.cells[row + 1][col].top = false;
-            queue[rear++] = &maze.cells[row + 1][col];
-        }
-        if (col > 0 && !maze.cells[row][col - 1].visited && !maze.cells[row][col].left)
-        {
-            maze.cells[row][col - 1].visited = true;
-            maze.cells[row][col - 1].right = false;
-            queue[rear++] = &maze.cells[row][col - 1];
-        }
-        if (col < maze.cols - 1 && !maze.cells[row][col + 1].visited && !maze.cells[row][col].right)
-        {
-            maze.cells[row][col + 1].visited = true;
-            maze.cells[row][col + 1].left = false;
-            queue[rear++] = &maze.cells[row][col + 1];
-        }
-    }
 }
 
 void controlkeys(int key, int x, int y)
@@ -383,7 +276,6 @@ void keyboard(unsigned char key, int x, int y)
     }
     if (df == 0 && key == '4')
     {
-        find_path();
         draw_maze();
         glutPostRedisplay();
         df = 1;
@@ -472,7 +364,7 @@ void frontscreen()
     char doneBy[] = "By :";
     char byName[] = "Aneesh Khatawkar (1JS17CS350) and Sudarshana MG (1JS20CS167)";
     char underGuide[] = "Under The Guidence of :";
-    char lecturerName[] = "Sharana Basava Gowda";
+    char lecturerName[] = "Dr. Sharana Basava Gowda";
     char next[] = "Press ENTER to go to next screen";
 
     glColor3f(1.0, 0.0, 0.0);
@@ -584,7 +476,6 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(window_width, window_height);
     glutCreateWindow("Maze Generator");
-    mark_shortest_path();
 
     glutDisplayFunc(display_maze);
     glGetError();
