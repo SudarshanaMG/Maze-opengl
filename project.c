@@ -7,7 +7,7 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 10, count;
+int df = 10, count,tempx,tempy;
 int textX = 700;
 int textY = 100;
 char t[2];
@@ -302,6 +302,10 @@ void keyboard(unsigned char key, int x, int y)
     else if (df == 4 && key == '4')
     {
         df = 1;
+        maze.rows=tempx;
+        maze.cols=tempy;
+        maze.endRow = maze.rows - 1;
+        maze.endCol = maze.cols - 1;
         initialize_maze();
         generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
         maze.playerRow = maze.startRow;
@@ -529,6 +533,8 @@ int main(int argc, char **argv)
         printf("Invalid maze dimensions.\n");
         return 1;
     }
+    tempx=maze.rows;
+    tempy=maze.cols;
     maze.startRow = 0;
     maze.startCol = 0;
     maze.endRow = maze.rows - 1;
