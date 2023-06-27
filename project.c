@@ -7,7 +7,7 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 10, count;
+int df = 4, count;
 int textX = 700;
 int textY = 100;
 char t[2];
@@ -300,6 +300,22 @@ void winscreen()
     output(textX - 20, textY + 400, "* PRESS 1 TO RESTART THE GAME");
     glFlush();
 }
+void menu()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+    glColor3f(1.0, 1.0, 0.0);
+    output(textX + 100, textY+100, "MENU");
+    output(textX,textY+120,"--------------------");
+    glColor3f(0.0, 1.0, 1.0);
+    output(textX + 50, textY + 200, "1.EASY MODE");
+    output(textX + 50, textY + 300, "2.MEDIUM MODE");
+    output(textX + 50, textY + 400, "3.DIFFICULT MODE");
+    output(textX + 50, textY + 500, "4.AUTO");
+    glColor3f(1.0, 0.0, 1.0);
+    output(textX - 50, textY + 600, "* PRESS ESC TO GO TO MAIN MENU");
+    glFlush();
+}
 void instructions()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -442,11 +458,15 @@ void display_maze()
     {
         exit(1);
     }
-    else if (df == 4)
+    else if(df == 4)
+    {
+        menu();
+    }
+    else if (df == 5)
     {
         timeover();
     }
-    else if (df == 5)
+    else if (df == 6)
     {
         winscreen();
     }
