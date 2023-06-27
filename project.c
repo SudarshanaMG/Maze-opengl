@@ -7,12 +7,13 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 4, count;
+int df = 10, count;
 int textX = 700;
 int textY = 100;
 char t[2];
 clock_t start, end;
 void winscreen();
+void menu();
 typedef struct
 {
     bool left;
@@ -213,7 +214,7 @@ void draw_maze()
 
     if (maze.playerRow == maze.endRow && maze.playerCol == maze.endCol)
     {
-        df = 5;
+        df = 6;
     }
     glutSwapBuffers();
 }
@@ -249,7 +250,56 @@ void keyboard(unsigned char key, int x, int y)
 
     if (df == 10 && key == 13)
         df = 0;
-    else if ((df == 0 || df == 4 || df == 5) && key == '1')
+    else if ((df == 0 || df == 5 || df == 6) && key == '1')
+    {
+        df = 4;
+    }
+    else if (df == 4 && key == '1')
+    {
+        df = 1;
+        maze.rows = 10;
+        maze.cols = 10;
+        maze.endRow = maze.rows - 1;
+        maze.endCol = maze.cols - 1;
+        initialize_maze();
+        generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol; // for restarting of maze
+        start = clock();
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
+    }
+    else if (df == 4 && key == '2')
+    {
+        df = 1;
+        maze.rows = 15;
+        maze.cols = 15;
+        maze.endRow = maze.rows - 1;
+        maze.endCol = maze.cols - 1;
+        initialize_maze();
+        generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol; // for restarting of maze
+        start = clock();
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
+    }
+    else if (df == 4 && key == '3')
+    {
+        df = 1;
+        maze.rows = 20;
+        maze.cols = 20;
+        maze.endRow = maze.rows - 1;
+        maze.endCol = maze.cols - 1;
+        initialize_maze();
+        generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol; // for restarting of maze
+        start = clock();
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
+    }
+    else if (df == 4 && key == '4')
     {
         df = 1;
         initialize_maze();
@@ -267,20 +317,14 @@ void keyboard(unsigned char key, int x, int y)
     else if (key == 27)
     {
         df = 0;
+        key == 0;
     }
-    if ((key == '0' || key == '1') && (df == 4 || df == 1))
+    if ((key == '0' || key == '1') && (df == 5 || df == 1))
     {
         df = 1;
         controlkeys((int)key, x, y);
         glutPostRedisplay();
     }
-    if (df == 0 && key == '4')
-    {
-        draw_maze();
-        glutPostRedisplay();
-        df = 1;
-    }
-
     glutPostRedisplay();
 }
 void winscreen()
@@ -305,15 +349,16 @@ void menu()
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glColor3f(1.0, 1.0, 0.0);
-    output(textX + 100, textY+100, "MENU");
-    output(textX,textY+120,"--------------------");
+    output(textX + 100, textY + 100, "MENU");
+    output(textX, textY + 120, "--------------------");
     glColor3f(0.0, 1.0, 1.0);
     output(textX + 50, textY + 200, "1.EASY MODE");
     output(textX + 50, textY + 300, "2.MEDIUM MODE");
     output(textX + 50, textY + 400, "3.DIFFICULT MODE");
-    output(textX + 50, textY + 500, "4.AUTO");
+    output(textX + 50, textY + 500, "4.MANUAL MODE");
+    output(textX + 50, textY + 600, "5.AUTO PATH FINDING");
     glColor3f(1.0, 0.0, 1.0);
-    output(textX - 50, textY + 600, "* PRESS ESC TO GO TO MAIN MENU");
+    output(textX - 50, textY + 700, "* PRESS ESC TO GO TO MAIN MENU");
     glFlush();
 }
 void instructions()
@@ -398,7 +443,7 @@ void frontscreen()
     output(textX + 100, textY + 400, underGuide);
 
     glColor3f(0.0, 1.0, 1.0);
-    output(textX -70, textY + 450, lecturerName);
+    output(textX - 70, textY + 450, lecturerName);
 
     glColor3f(1.0, 0.0, 1.0);
     output(textX + 200, textY + 600, doneBy);
@@ -458,7 +503,7 @@ void display_maze()
     {
         exit(1);
     }
-    else if(df == 4)
+    else if (df == 4)
     {
         menu();
     }
