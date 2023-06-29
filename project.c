@@ -7,13 +7,15 @@
 #include <math.h>
 #define MAX_ROWS 30
 #define MAX_COLS 30
-int df = 10, count,tempx,tempy;
+#define INT_MAX 1000
+int df = 10, count, tempx, tempy;
 int textX = 700;
 int textY = 100;
 char t[2];
 clock_t start, end;
 void winscreen();
 void menu();
+void dijkstra(int startRow, int startCol, int endRow, int endCol);
 typedef struct
 {
     bool left;
@@ -34,9 +36,16 @@ typedef struct
     int endCol;
     int playerRow;
     int playerCol;
+    int weight;
 } MazeGrid;
 
 MazeGrid maze;
+typedef struct 
+{
+    int row;
+    int col;
+    Queue *next;
+}Queue;
 
 void output(int x, int y, char *string)
 {
@@ -302,14 +311,30 @@ void keyboard(unsigned char key, int x, int y)
     else if (df == 4 && key == '4')
     {
         df = 1;
-        maze.rows=tempx;
-        maze.cols=tempy;
+        maze.rows = tempx;
+        maze.cols = tempy;
         maze.endRow = maze.rows - 1;
         maze.endCol = maze.cols - 1;
         initialize_maze();
         generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
         maze.playerRow = maze.startRow;
         maze.playerCol = maze.startCol; // for restarting of maze
+        start = clock();
+        controlkeys((int)key, x, y);
+        glutPostRedisplay();
+    }
+    else if (df == 4 && key == '5')
+    {
+        df = 1;
+        maze.rows = tempx;
+        maze.cols = tempy;
+        maze.endRow = maze.rows - 1;
+        maze.endCol = maze.cols - 1;
+        initialize_maze();
+        generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
+        maze.playerRow = maze.startRow;
+        maze.playerCol = maze.startCol; // for restarting of maze
+        dijkstra(0, 0, maze.rows - 1, maze.cols - 1);
         start = clock();
         controlkeys((int)key, x, y);
         glutPostRedisplay();
@@ -521,6 +546,159 @@ void display_maze()
     }
     glutSwapBuffers();
 }
+
+
+void enqueue(Queue *front, Queue *rear, int row, int col)
+{
+    Queue *newNode ;
+    newNode->row = row;
+    newNode->col = col;
+    newNode->next = 0;
+
+    if (rear == 0)
+    {
+        front = rear = newNode;
+    }
+    else
+    {
+        rear->next = newNode;
+        rear = newNode;
+    }
+}
+
+void dequeue(Queue *front, Queue *rear, int row, int col)
+{
+    if (front == 0)
+    {
+        return;
+    }
+
+    row = front->row;
+    col = front->col;
+    Queue *temp = front;
+
+    if (front == rear)
+    {
+        front = rear = 0;
+    }
+    else
+    {
+        front = front->next;
+    }
+
+    delete (temp);
+}
+
+bool isEmpty(Queue *front)
+{
+    return front == 0;
+}
+
+void dijkstra(int startRow, int startCol, int endRow, int endCol)
+{
+    // Create a 2D array to store the distances from the start cell to each cell in the maze
+    int distances[MAX_ROWS][MAX_COLS];
+
+    // Initialize the distances to a very large value (representing infinity)
+    for (int row = 0; row < MAX_ROWS; row++)
+    {
+        for (int col = 0; col < MAX_COLS; col++)
+        {
+            distances[row][col] = INT_MAX;
+        }
+    }
+
+    // Set the distance of the start cell to 0
+    distances[startRow][startCol] = 0;
+
+    // Create a queue to store the cells to be visited
+    Queue *front = 0;
+    Queue *rear = 0;
+
+    // Initialize the queue with the start cell
+    enqueue(front, rear, startRow, startCol);
+
+    // Perform Dijkstra's algorithm
+    while (!isEmpty(front))
+    {
+        // Dequeue the next cell to visit
+        int row, col;
+        dequeue(front, rear, row, col);
+
+        // Check the neighboring cells
+        // Update their distances if a shorter path is found
+        if (row > 0 && !maze.cells[row][col].top && distances[row - 1][col] > distances[row][col] + 1)
+        {
+            distances[row - 1][col] = distances[row][col] + 1;
+            enqueue(front, rear, row - 1, col);
+        }
+        if (row < maze.rows - 1 && !maze.cells[row][col].bottom && distances[row + 1][col] > distances[row][col] + 1)
+        {
+            distances[row + 1][col] = distances[row][col] + 1;
+            enqueue(front, rear, row + 1, col);
+        }
+        if (col > 0 && !maze.cells[row][col].left && distances[row][col - 1] > distances[row][col] + 1)
+        {
+            distances[row][col - 1] = distances[row][col] + 1;
+            enqueue(front, rear, row, col - 1);
+        }
+        if (col < maze.cols - 1 && !maze.cells[row][col].right && distances[row][col + 1] > distances[row][col] + 1)
+        {
+            distances[row][col + 1] = distances[row][col] + 1;
+            enqueue(front, rear, row, col + 1);
+        }
+    }
+
+    // Check if a path exists from the start cell to the end cell
+    if (distances[endRow][endCol] != INT_MAX)
+    {
+        // Traverse the path from the end cell to the start cell
+        int row = endRow;
+        int col = endCol;
+
+        while (row != startRow || col != startCol)
+        {
+            glColor3f(1,1,1);
+            maze.cells[row][col].visited = true;
+
+            // Determine the neighboring cell with the shortest distance
+            int minDistance = INT_MAX;
+            int nextRow, nextCol;
+
+            if (row > 0 && !maze.cells[row][col].top && distances[row - 1][col] < minDistance)
+            {
+                minDistance = distances[row - 1][col];
+                nextRow = row - 1;
+                nextCol = col;
+            }
+            if (row < maze.rows - 1 && !maze.cells[row][col].bottom && distances[row + 1][col] < minDistance)
+            {
+                minDistance = distances[row + 1][col];
+                nextRow = row + 1;
+                nextCol = col;
+            }
+            if (col > 0 && !maze.cells[row][col].left && distances[row][col - 1] < minDistance)
+            {
+                minDistance = distances[row][col - 1];
+                nextRow = row;
+                nextCol = col - 1;
+            }
+            if (col < maze.cols - 1 && !maze.cells[row][col].right && distances[row][col + 1] < minDistance)
+            {
+                minDistance = distances[row][col + 1];
+                nextRow = row;
+                nextCol = col + 1;
+            }
+
+            row = nextRow;
+            col = nextCol;
+        }
+
+        // Mark the start cell in the maze (e.g., change its color)
+        // (Implementation of marking the start cell goes here)
+    }
+}
+
 int main(int argc, char **argv)
 {
     // Initialize random seed
@@ -533,8 +711,8 @@ int main(int argc, char **argv)
         printf("Invalid maze dimensions.\n");
         return 1;
     }
-    tempx=maze.rows;
-    tempy=maze.cols;
+    tempx = maze.rows;
+    tempy = maze.cols;
     maze.startRow = 0;
     maze.startCol = 0;
     maze.endRow = maze.rows - 1;
