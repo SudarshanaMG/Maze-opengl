@@ -498,11 +498,11 @@ void idle()
         count = (end - start) / CLOCKS_PER_SEC;
         if (count == 60)
         {
-            df = 4;
+            df = 5;
         }
         else if ((count < 60) && (maze.playerRow == maze.endRow && maze.playerCol == maze.endCol))
         {
-            df = 5;
+            df = 6;
             winscreen();
         }
     }
@@ -558,6 +558,7 @@ void display_maze()
 int main(int argc, char **argv)
 {
     // Initialize random seed
+    printf("\n\nEnter maze dimensions for manual mode\n");
     printf("Enter the number of rows for maze(1-%d): ", MAX_ROWS);
     scanf("%d", &maze.rows);
     printf("Enter the number of columns for maze(1-%d): ", MAX_COLS);
