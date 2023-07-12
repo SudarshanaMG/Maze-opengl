@@ -330,22 +330,6 @@ void keyboard(unsigned char key, int x, int y)
         controlkeys((int)key, x, y);
         glutPostRedisplay();
     }
-    // else if (df == 4 && key == '5')
-    // {
-    //     df = 1;
-    //     maze.rows = 20;
-    //     maze.cols = 20;
-    //     maze.endRow = maze.rows - 1;
-    //     maze.endCol = maze.cols - 1;
-    //     initialize_maze();
-    //     generate_maze(maze.startRow, maze.startCol); // for generation of new mazes
-    //     maze.playerRow = maze.startRow;
-    //     maze.playerCol = maze.startCol; // for restarting of maze
-    //     dijkstra(maze.startRow, maze.startCol, maze.endRow, maze.endCol);
-    //     start = clock();
-    //     controlkeys((int)key, x, y);
-    //     glutPostRedisplay();
-    // }
     else if (df == 0 && key == '2')
         df = 2;
     else if (df == 0 && key == '3')
@@ -554,6 +538,15 @@ void display_maze()
     glutSwapBuffers();
 }
 
+void menu1(int id)
+{
+    switch(id)
+    {
+        case 1: exit(1);break;
+        case 2: df=4;break;
+    }
+    glutPostRedisplay();
+}
 
 int main(int argc, char **argv)
 {
@@ -589,6 +582,10 @@ int main(int argc, char **argv)
     glutIdleFunc(idle);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(controlkeys);
+    glutCreateMenu(menu1);
+    glutAddMenuEntry("Quit",1);
+    glutAddMenuEntry("Game Menu",2);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     glutMainLoop();
     return 0;
